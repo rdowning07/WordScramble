@@ -37,12 +37,17 @@ Open WordScramble.xcodeproj in Xcode 16+
 
 Press Run ▶️ to play!
 
+🛠️ Updates (Project Enhancements)
+
+Short Word Validation: Added a guard clause to disallow words shorter than three letters.
+
+Long Word Bonus: Added a simple scoring bonus (+5) for words with seven or more letters.
+
+Gameplay Polish: Maintained a clean restart flow using the existing “Restart” button to start a new round.
+
 📚 Reference
 
-Based on Paul Hudson’s Project 5: Word Scramble
-
-from the 100 Days of SwiftUI course on Hacking with Swift
-.
+Based on Paul Hudson’s Project 5: Word Scramble from the 100 Days of SwiftUI course on Hacking with Swift
 
 🧾 License
 

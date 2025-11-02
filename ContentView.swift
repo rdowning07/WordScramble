@@ -42,7 +42,7 @@ struct ContentView: View {
             }
             .navigationTitle(rootWord)
             .toolbar {
-                Button("Restart", action: startGame)
+                Button("New Word", action: startGame)
             }
             .onAppear(perform: startGame)
             .alert(errorTitle, isPresented: $showingError) {
@@ -79,11 +79,21 @@ struct ContentView: View {
             return
         }
 
+        // ✅ New: disallow words shorter than 3 letters
+        guard answer.count >= 3 else {
+            wordError(title: "Too short", message: "Words must be at least three letters long.")
+            return
+        }
+
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
 
-        score += answer.count  // Simple scoring: 1 point per letter
+        // ✅ Updated: add a small bonus for long words
+        let base = answer.count
+        let longWordBonus = answer.count >= 7 ? 5 : 0
+        score += base + longWordBonus
+
         newWord = ""
     }
 
