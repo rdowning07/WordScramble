@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  WordScramble
+//  WordScramble Demo Edition
 //
 //  Created by Rob Downing on 10/30/25.
 //
@@ -17,6 +17,11 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
 
+    // 🎯 Demo-related state
+    @State private var roundCount = 0
+    @State private var maxRounds = 5
+    @State private var gameOver = false
+
     var body: some View {
         NavigationStack {
             List {
@@ -24,6 +29,7 @@ struct ContentView: View {
                     TextField("Enter your word", text: $newWord)
                         .textInputAutocapitalization(.never)
                         .onSubmit(addNewWord)
+                        .disabled(gameOver)
                 }
 
                 Section("Used words") {
@@ -39,16 +45,27 @@ struct ContentView: View {
                     Text("\(score)")
                         .font(.title.bold())
                 }
+
+                Section("Round") {
+                    Text("\(roundCount) / \(maxRounds)")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
             }
             .navigationTitle(rootWord)
             .toolbar {
-                Button("New Word", action: startGame)
+                Button("Restart", action: startGame)
             }
             .onAppear(perform: startGame)
             .alert(errorTitle, isPresented: $showingError) {
                 Button("OK") { }
             } message: {
                 Text(errorMessage)
+            }
+            .alert("Game Over!", isPresented: $gameOver) {
+                Button("Play Again", action: startGame)
+            } message: {
+                Text("You scored \(score) points with \(usedWords.count) words.")
             }
         }
     }
@@ -65,12 +82,12 @@ struct ContentView: View {
         }
 
         guard isPossible(word: answer) else {
-            wordError(title: "Word not possible", message: "You can't spell that word from '\(rootWord)'!")
+            wordError(title: "Word not possible", message: "You can't spell that from '\(rootWord)'!")
             return
         }
 
         guard isReal(word: answer) else {
-            wordError(title: "Word not recognized", message: "You can't just make them up, you know!")
+            wordError(title: "Word not recognized", message: "You can't just make them up!")
             return
         }
 
@@ -79,7 +96,6 @@ struct ContentView: View {
             return
         }
 
-        // ✅ New: disallow words shorter than 3 letters
         guard answer.count >= 3 else {
             wordError(title: "Too short", message: "Words must be at least three letters long.")
             return
@@ -89,10 +105,16 @@ struct ContentView: View {
             usedWords.insert(answer, at: 0)
         }
 
-        // ✅ Updated: add a small bonus for long words
+        // Simple scoring
         let base = answer.count
         let longWordBonus = answer.count >= 7 ? 5 : 0
         score += base + longWordBonus
+
+        // Increment round
+        roundCount += 1
+        if roundCount >= maxRounds {
+            gameOver = true
+        }
 
         newWord = ""
     }
@@ -104,6 +126,9 @@ struct ContentView: View {
                 rootWord = allWords.randomElement() ?? "silkworm"
                 usedWords.removeAll()
                 score = 0
+                roundCount = 0
+                gameOver = false
+                newWord = ""
                 return
             }
         }
@@ -117,7 +142,6 @@ struct ContentView: View {
 
     func isPossible(word: String) -> Bool {
         var tempWord = rootWord
-
         for letter in word {
             if let pos = tempWord.firstIndex(of: letter) {
                 tempWord.remove(at: pos)
@@ -125,7 +149,6 @@ struct ContentView: View {
                 return false
             }
         }
-
         return true
     }
 
